@@ -54,10 +54,13 @@ export const useAuthStore = create((set) => {
     login: async (username, password) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await axios.post("http://localhost:8000/api/login/", {
-          username,
-          password,
-        });
+        const response = await axios.post(
+          "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/login/",
+          {
+            username,
+            password,
+          }
+        );
 
         const { user } = response.data;
 

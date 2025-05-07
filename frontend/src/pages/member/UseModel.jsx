@@ -69,7 +69,7 @@ export default function UseModel() {
 
       // Make prediction request
       const response = await axios.post(
-        "http://localhost:8000/api/predict/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/predict/",
         formData,
         {
           headers: {

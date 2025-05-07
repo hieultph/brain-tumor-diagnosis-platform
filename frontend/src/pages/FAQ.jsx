@@ -19,7 +19,9 @@ export default function FAQ() {
 
   const fetchFAQs = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/faq/");
+      const response = await axios.get(
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/faq/"
+      );
       setFaqs(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -31,11 +33,14 @@ export default function FAQ() {
   const handleCreateFAQ = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8000/api/faq/create/", {
-        created_by: user.user_id,
-        question: newQuestion,
-        answer: newAnswer,
-      });
+      await axios.post(
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/faq/create/",
+        {
+          created_by: user.user_id,
+          question: newQuestion,
+          answer: newAnswer,
+        }
+      );
       setNewQuestion("");
       setNewAnswer("");
       fetchFAQs();

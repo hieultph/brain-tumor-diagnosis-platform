@@ -24,7 +24,7 @@ export const useNotificationStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/notifications/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/notifications/?user_id=${user.user_id}`
       );
       const notifications = response.data || [];
       set({
@@ -60,7 +60,7 @@ export const useNotificationStore = create((set, get) => ({
 
     try {
       await axios.put(
-        `http://localhost:8000/api/notifications/${notificationId}/read/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/notifications/${notificationId}/read/`,
         { user_id: user.user_id }
       );
       return true;
@@ -89,7 +89,7 @@ export const useNotificationStore = create((set, get) => ({
 
     try {
       await axios.put(
-        "http://localhost:8000/api/notifications/mark-all-read/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/notifications/mark-all-read/",
         { user_id: user.user_id }
       );
       return true;
@@ -123,7 +123,7 @@ export const useNotificationStore = create((set, get) => ({
 
     try {
       await axios.delete(
-        `http://localhost:8000/api/notifications/${notificationId}/delete/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/notifications/${notificationId}/delete/`,
         { params: { user_id: user.user_id } }
       );
       return true;

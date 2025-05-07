@@ -12,7 +12,7 @@ export const useProfileStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/contributions/?researcher_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/?researcher_id=${user.user_id}`
       );
       set({ contributions: response.data, isLoading: false });
     } catch (error) {
@@ -25,7 +25,7 @@ export const useProfileStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/contributions/upload/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/upload/",
         {
           researcher_id: user.user_id,
           researcher: user.user_id,
@@ -56,7 +56,7 @@ export const useProfileStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       await axios.delete(
-        `http://localhost:8000/api/contributions/${contributionId}/delete/?researcher_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/${contributionId}/delete/?researcher_id=${user.user_id}`
       );
       set((state) => ({
         contributions: state.contributions.filter(

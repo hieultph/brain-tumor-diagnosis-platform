@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-http://localhost:8000/api
+https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api
 ```
 
 ## Authentication

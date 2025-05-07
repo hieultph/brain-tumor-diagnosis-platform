@@ -13,7 +13,7 @@ export const useAdminStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/users/?admin_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/users/?admin_id=${user.user_id}`
       );
       set({ users: response.data, isLoading: false });
     } catch (error) {
@@ -25,7 +25,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     set({ isLoading: true });
     try {
-      const url = `http://localhost:8000/api/contributions/review/?admin_id=${user.user_id}&status=all`;
+      const url = `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/review/?admin_id=${user.user_id}&status=all`;
       const response = await axios.get(url);
       set({ contributions: response.data, isLoading: false });
     } catch (error) {
@@ -37,7 +37,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/contributions/${contributionId}/weights/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/${contributionId}/weights/?user_id=${user.user_id}`
       );
       return response.data.weights;
     } catch (error) {
@@ -50,7 +50,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/contributions/${contributionId}/update-status/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/contributions/${contributionId}/update-status/`,
         {
           admin_id: user.user_id,
           status: status,
@@ -88,7 +88,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/experimental-models/create/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/experimental-models/create/",
         {
           admin_id: user.user_id,
           contribution_ids,
@@ -116,7 +116,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/models/publish/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/publish/",
         {
           admin_id: user.user_id,
           model_id: modelId,
@@ -133,7 +133,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       await axios.put(
-        `http://localhost:8000/api/comments/${commentId}/moderate/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/comments/${commentId}/moderate/`,
         {
           admin_id: user.user_id,
           is_approved: isApproved,
@@ -150,7 +150,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/faq/create/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/faq/create/",
         {
           created_by: user.user_id,
           question,
@@ -168,7 +168,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       await axios.delete(
-        `http://localhost:8000/api/users/${userId}/delete/?admin_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/users/${userId}/delete/?admin_id=${user.user_id}`
       );
       set((state) => ({
         users: state.users.filter((u) => u.user_id !== userId),
@@ -184,7 +184,7 @@ export const useAdminStore = create((set, get) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/assign-role/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/users/assign-role/",
         {
           admin_id: user.user_id,
           user_id: userId,

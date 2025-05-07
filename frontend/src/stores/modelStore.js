@@ -13,10 +13,13 @@ export const useModelStore = create((set) => ({
   createModel: async (modelData) => {
     const user = useAuthStore.getState().user;
     try {
-      const response = await axios.post(`http://localhost:8000/api/models/`, {
-        admin_id: user.user_id,
-        ...modelData,
-      });
+      const response = await axios.post(
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/`,
+        {
+          admin_id: user.user_id,
+          ...modelData,
+        }
+      );
       return true;
     } catch (error) {
       set({ error: "Failed to create model" });
@@ -28,7 +31,7 @@ export const useModelStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/models/${modelId}/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/${modelId}/`,
         {
           ...modelData,
           admin_id: user.user_id,
@@ -59,7 +62,7 @@ export const useModelStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/models/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/?user_id=${user.user_id}`
       );
       set({ models: response.data, isLoading: false });
     } catch (error) {
@@ -71,7 +74,7 @@ export const useModelStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/models/${modelId}/weights/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/${modelId}/weights/?user_id=${user.user_id}`
       );
       return response.data.weights;
     } catch (error) {
@@ -84,7 +87,7 @@ export const useModelStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       await axios.delete(
-        `http://localhost:8000/api/models/${modelId}/delete/?admin_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/${modelId}/delete/?admin_id=${user.user_id}`
       );
       set((state) => ({
         models: state.models.filter((model) => model.model_id !== modelId),
@@ -100,7 +103,7 @@ export const useModelStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/models/publish/",
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/publish/",
         {
           admin_id: user.user_id,
           model_id: modelId,
@@ -118,7 +121,7 @@ export const useModelStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/models/?user_id=${user.user_id}&status=experimental`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/?user_id=${user.user_id}&status=experimental`
       );
       set({ experimentalModels: response.data, isLoading: false });
     } catch (error) {
@@ -131,7 +134,7 @@ export const useModelStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/models/${modelId}/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/models/${modelId}/?user_id=${user.user_id}`
       );
       set({ selectedModel: response.data, isLoading: false });
 
@@ -147,7 +150,7 @@ export const useModelStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/comments/${modelId}/?user_id=${user.user_id}`
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/comments/${modelId}/?user_id=${user.user_id}`
       );
       set({ modelComments: response.data, isLoading: false });
     } catch (error) {
@@ -158,12 +161,15 @@ export const useModelStore = create((set) => ({
   rateModel: async (modelId, rating) => {
     const user = useAuthStore.getState().user;
     try {
-      await axios.post("http://localhost:8000/api/rate-model/", {
-        user_id: user.user_id,
-        user: user.user_id,
-        model: modelId,
-        rating,
-      });
+      await axios.post(
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/rate-model/",
+        {
+          user_id: user.user_id,
+          user: user.user_id,
+          model: modelId,
+          rating,
+        }
+      );
       return true;
     } catch (error) {
       set({ error: "Failed to rate model" });
@@ -174,12 +180,15 @@ export const useModelStore = create((set) => ({
   commentOnModel: async (modelId, comment) => {
     const user = useAuthStore.getState().user;
     try {
-      await axios.post("http://localhost:8000/api/comment-model/", {
-        user_id: user.user_id,
-        user: user.user_id,
-        model: modelId,
-        comment_text: comment,
-      });
+      await axios.post(
+        "https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/comment-model/",
+        {
+          user_id: user.user_id,
+          user: user.user_id,
+          model: modelId,
+          comment_text: comment,
+        }
+      );
       // Refresh comments after posting
       await set.getState().fetchModelComments(modelId);
       return true;
@@ -193,7 +202,7 @@ export const useModelStore = create((set) => ({
     const user = useAuthStore.getState().user;
     try {
       await axios.put(
-        `http://localhost:8000/api/comments/${commentId}/moderate/`,
+        `https://brain-tumor-diagnosis-platform-9wgl.onrender.com/api/comments/${commentId}/moderate/`,
         {
           admin_id: user.user_id,
           is_approved: isApproved,
