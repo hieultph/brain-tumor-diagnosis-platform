@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-your-secret-key'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'brain-tumor-diagnosis-platform-9wgl.onrender.com',
+    'https://brain-tumor-diagnosis-platform-9lmo.onrender.com',
     'fedlearn-platform.netlify.app',
     'localhost',
     '127.0.0.1',
