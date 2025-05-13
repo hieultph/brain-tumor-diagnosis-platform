@@ -1,0 +1,92 @@
+-- Create Roles table
+CREATE TABLE Roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Create Users table
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    gdrive JSONB NOT NULL,
+    role_id INT REFERENCES Roles(role_id) DEFAULT 1,  -- Default to Visitor
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_points INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Create Models table (if status is experiment, it is experimentalmodels)
+CREATE TABLE Models (
+    model_id SERIAL PRIMARY KEY,
+    model_name VARCHAR(50) NOT NULL,
+    model_description TEXT NOT NULL,
+    version INT NOT NULL,
+    published_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'experimental', -- active, experimental, archieved
+    weights JSONB NOT NULL,
+    metrics JSONB NOT NULL
+);
+
+-- Create Contributions table
+CREATE TABLE Contributions (
+    contribution_id SERIAL PRIMARY KEY,
+    researcher_id INT REFERENCES Users(user_id),
+    model_id INT REFERENCES Models(model_id),
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    weights JSONB NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    points_earned INT DEFAULT 0
+);
+
+-- Create ContributionToModel table (junction table)
+CREATE TABLE ContributionToModel (
+    id SERIAL PRIMARY KEY,
+    model_id INT REFERENCES Models(model_id),
+    contribution_id INT REFERENCES Contributions(contribution_id)
+);
+
+-- Create Ratings table
+CREATE TABLE Ratings (
+    rating_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users(user_id),
+    model_id INT REFERENCES Models(model_id),
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    rated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Comments table
+CREATE TABLE Comments (
+    comment_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users(user_id),
+    model_id INT REFERENCES Models(model_id),
+    comment_text TEXT NOT NULL,
+    comment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_approved BOOLEAN DEFAULT FALSE
+);
+
+-- Create Notifications table
+CREATE TABLE Notifications (
+    notification_id SERIAL PRIMARY KEY,
+    message TEXT NOT NULL,
+    sent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create NotificationToUser table
+CREATE TABLE NotificationToUser (
+    notification_id SERIAL REFERENCES Notifications(notification_id),
+    user_id SERIAL REFERENCES Users(user_id),
+    is_read BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (notification_id, user_id)
+);
+
+-- Create FAQ table
+CREATE TABLE FAQ (
+    faq_id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    created_by INT REFERENCES Users(user_id),
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

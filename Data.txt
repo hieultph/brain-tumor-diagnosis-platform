@@ -1,0 +1,92 @@
+-- Insert into Roles
+INSERT INTO Roles (role_name) VALUES
+    ('Visitor'),
+    ('Member'),
+    ('Researcher'),
+    ('Admin');
+
+-- Insert into Users (5 rows for variety)
+INSERT INTO Users (username, password_hash, email, gdrive, role_id, total_points) VALUES
+    ('admin1', '123', 'admin1@example.com', '{"client_id": "", "client_secret": "", "refesh_token": "", "contributions_url": "", "models_url": ""}', 4, 0),        -- Admin
+    ('researcher1', '123', 'researcher1@example.com', '{"client_id": "", "client_secret": "", "refesh_token": "", "contributions_url": "", "models_url": ""}', 3, 25), -- Researcher
+    ('member1', 'hashed_password3', 'member1@example.com', '{"client_id": "", "client_secret": "", "refesh_token": "", "contributions_url": "", "models_url": ""}', 2, 0),      -- Member
+    ('visitor1', 'hashed_password4', 'visitor1@example.com', '{"client_id": "", "client_secret": "", "refesh_token": "", "contributions_url": "", "models_url": ""}', 1, 0),    -- Visitor
+    ('researcher2', 'hashed_password5', 'researcher2@example.com', '{"client_id": "", "client_secret": "", "refesh_token": "", "contributions_url": "", "models_url": ""}', 3, 10);
+
+-- Insert into Models
+INSERT INTO Models (model_name, model_description, version, status, weights, metrics) VALUES
+    ('Brain Tumor', 'A model for detecting brain tumors from MRI scans using deep learning techniques.', 1, 'active', '{"weights_url": ""}', '{"accuracy": 0.95, "precision": 0.92}'),
+    ('Covid', 'A predictive model for identifying COVID-19 patterns from chest X-ray images.', 2, 'experimental', '{"weights_url": ""}', '{"accuracy": 0.96, "precision": 0.93}'),
+    ('Heart Disease', 'A machine learning model for diagnosing heart disease based on patient data.', 3, 'active', '{"weights_url": ""}', '{"accuracy": 0.97, "precision": 0.94}'),
+    ('Diabetes Predictor', 'An experimental model to predict diabetes risk using clinical features.', 4, 'experimental', '{"weights_url": ""}', '{"accuracy": 0.98, "precision": 0.95}'),
+    ('Lung Cancer', 'An archived model for lung cancer detection from CT scans.', 5, 'archived', '{"weights_url": ""}', '{"accuracy": 0.99, "precision": 0.96}');
+
+-- Insert into Contributions (researcher1: id 2, researcher2: id 5)
+INSERT INTO Contributions (researcher_id, model_id, weights, status, points_earned) VALUES
+    (2, 1, '{"weights_url": ""}', 'approved', 10),
+    (2, 2, '{"weights_url": ""}', 'pending', 0),
+    (2, 3, '{"weights_url": ""}', 'aggregated', 15),
+    (5, 4, '{"weights_url": ""}', 'approved', 10),
+    (5, 4, '{"weights_url": ""}', 'pending', 0);
+
+-- Insert into ContributionToModel
+INSERT INTO ContributionToModel (model_id, contribution_id) VALUES
+    (1, 1),  -- Global model 1 from contribution 1
+    (1, 3),  -- Global model 1 from contribution 3
+    (2, 4),  -- Global model 2 from contribution 4
+    (3, 1),  -- Global model 3 from contribution 1 (reused)
+    (4, 3);  -- Global model 4 from contribution 3 (reused)
+
+-- Insert into Ratings (member1: id 3, member2: id 2)
+INSERT INTO Ratings (user_id, model_id, rating) VALUES
+    (3, 1, 4),
+    (3, 2, 5),
+    (2, 1, 3),
+    (2, 3, 4),
+    (3, 4, 5);
+
+-- Insert into Comments (member1: id 3, member2: id 2)
+INSERT INTO Comments (user_id, model_id, comment_text, is_approved) VALUES
+    (3, 1, 'Great model!', TRUE),
+    (3, 2, 'Improved accuracy.', TRUE),
+    (2, 1, 'Had some issues.', FALSE),
+    (2, 3, 'Works well for my data.', TRUE),
+    (3, 4, 'Best version yet!', TRUE);
+
+-- Insert into Notifications
+INSERT INTO Notifications (message) VALUES
+    ('New global model version 5 released!'), 
+    ('New global model version 5 released!'),  
+    ('Your contribution has been uploaded successfully.'),  
+    ('Your contribution has been uploaded successfully.'),
+    ('Your contribution has been uploaded successfully.');
+
+INSERT INTO NotificationToUser (notification_id, user_id, is_read) VALUES
+    (1, 1, False), 
+    (2, 1, True), 
+    (3, 1, False), 
+    (4, 1, True), 
+    (5, 1, False),
+    (1, 2, True), 
+    (2, 2, False), 
+    (3, 2, True), 
+    (4, 2, False), 
+    (5, 2, True),
+    (1, 3, False), 
+    (2, 3, True), 
+    (3, 3, False), 
+    (4, 3, True), 
+    (5, 3, False),
+    (1, 5, True), 
+    (2, 5, False), 
+    (3, 5, True), 
+    (4, 5, False), 
+    (5, 5, True);
+
+-- Insert into FAQ (created by admin1: id 1)
+INSERT INTO FAQ (question, answer, created_by) VALUES
+    ('How do I download the model?', 'Click the download button on the model page.', 1),
+    ('How can I contribute my model weights?', 'Go to the contribution section and upload your weights.', 1),
+    ('What are the supported model formats?', 'We support JSON format for weights.', 1),
+    ('How are contributions evaluated?', 'Admins review and test contributions before aggregation.', 1),
+    ('Can I delete my contribution?', 'Yes, if it is still pending.', 1);
