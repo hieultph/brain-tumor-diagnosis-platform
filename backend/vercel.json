@@ -1,15 +1,20 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "backend/wsgi.py",
+      "src": "manage.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb", "runtime": "python3.9.19" }
+      "config": { "maxLambdaSize": "50mb" }
     }
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "static/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "federated_learning_platform/wsgi.py"
+      "dest": "manage.py"
     }
   ]
 }
