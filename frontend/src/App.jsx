@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Models from "./pages/Models";
 import ModelDetails from "./pages/ModelDetails";
 import Profile from "./pages/Profile";
@@ -31,6 +32,7 @@ function App() {
       <Toaster position="top-right" />
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route element={<Layout />}>
           <Route
