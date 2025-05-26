@@ -23,22 +23,21 @@ export const useModelStore = create((set) => ({
       if (
         !modelData.model_name ||
         !modelData.model_description ||
-        !modelData.weights
+        !modelData.weights?.weights_url
       ) {
         set({ error: "Missing required fields" });
         return false;
       }
 
       const response = await axios.post(
-        `http://localhost:8000/api/models/`,
+        "http://localhost:8000/api/models/",
         {
           admin_id: user.user_id,
-          ...modelData,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          model_name: modelData.model_name,
+          model_description: modelData.model_description,
+          weights: modelData.weights,
+          metrics: modelData.metrics,
+          status: modelData.status,
         }
       );
 

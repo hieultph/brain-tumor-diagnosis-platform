@@ -34,6 +34,10 @@ export default function ManageModels() {
     model_description: "",
     model_file: null,
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     loadModels();
@@ -43,61 +47,18 @@ export default function ManageModels() {
     await fetchModels();
   };
 
-  const handleFileUpload = async (event, isEditing = false) => {
-    if (!user?.gdrive?.client_id || !user?.gdrive?.models_url) {
-      toast.error(
-        "Please configure Google Drive settings in your profile first"
-      );
-      return;
-    }
-
+  const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
       if (!file.name.endsWith(".h5")) {
         toast.error("Please select a .h5 model file");
         return;
       }
-
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await axios.post(
-          "http://localhost:8000/api/models/upload-weights/",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            params: {
-              admin_id: user.user_id,
-            },
-          }
-        );
-
-        if (response.data.weights_url) {
-          if (isEditing) {
-            setEditingModel((prev) => ({
-              ...prev,
-              weights: { weights_url: response.data.weights_url },
-            }));
-          } else {
-            setNewModel((prev) => ({
-              ...prev,
-              model_file: file,
-              weights: { weights_url: response.data.weights_url },
-            }));
-          }
-          toast.success("Model file uploaded successfully");
-        } else {
-          throw new Error("Failed to get weights URL");
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        toast.error(
-          error.response?.data?.message || "Failed to upload model file"
-        );
-      }
+      setSelectedFile(file);
+      setNewModel(prev => ({
+        ...prev,
+        model_file: file
+      }));
     }
   };
 
@@ -109,9 +70,52 @@ export default function ManageModels() {
       return;
     }
 
+    if (!selectedFile) {
+      toast.error("Please select a model file first");
+      return;
+    }
+
+    if (!user?.gdrive?.client_id || !user?.gdrive?.models_url) {
+      toast.error("Please configure Google Drive settings in your profile first");
+      return;
+    }
+
+    setIsCreating(true);
+    setUploadProgress(0);
+
     try {
+      // First upload the file to Google Drive
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const uploadResponse = await axios.post(
+        "http://localhost:8000/api/models/upload-weights/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          params: {
+            admin_id: user.user_id,
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          },
+        }
+      );
+
+      if (!uploadResponse.data.weights_url) {
+        throw new Error("Failed to get weights URL");
+      }
+
+      // Then create the model with the weights URL
       const success = await createModel({
-        ...newModel,
+        model_name: newModel.model_name,
+        model_description: newModel.model_description,
+        weights: { weights_url: uploadResponse.data.weights_url },
         metrics: {
           accuracy: 0,
           precision: 0,
@@ -128,7 +132,9 @@ export default function ManageModels() {
           model_name: "",
           model_description: "",
           model_file: null,
+          weights: null,
         });
+        setSelectedFile(null);
         loadModels();
       } else {
         const error = useModelStore.getState().error;
@@ -136,7 +142,10 @@ export default function ManageModels() {
       }
     } catch (error) {
       console.error("Model creation error:", error);
-      toast.error("An unexpected error occurred while creating the model");
+      toast.error(error.response?.data?.message || "Failed to create model");
+    } finally {
+      setIsCreating(false);
+      setUploadProgress(0);
     }
   };
 
@@ -194,9 +203,18 @@ export default function ManageModels() {
       const response = await axios.get(`http://localhost:8000/api/models/${modelId}/?user_id=${user.user_id}`);
       const model = response.data;
       
-      console.log("Model data:", model);
-      if (!model?.weights?.weights_url) {
-        toast.error("No model weights found");
+      if (!model) {
+        toast.error("Failed to fetch model data");
+        return;
+      }
+
+      if (!model.weights) {
+        toast.error("Model weights not found in the response");
+        return;
+      }
+
+      if (!model.weights.weights_url) {
+        toast.error("No model weights URL found");
         return;
       }
 
@@ -211,6 +229,7 @@ export default function ManageModels() {
       setIsPublishModalOpen(true);
     } catch (error) {
       console.error("Error fetching model details:", error);
+      console.error("Error response:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch model details");
     }
   };
@@ -218,9 +237,16 @@ export default function ManageModels() {
   const confirmPublish = async () => {
     setIsPublishing(true);
     try {
-      const model = models.find((m) => m.model_id === selectedModelId);
+      // Fetch model details again to ensure we have the latest data
+      const modelResponse = await axios.get(`http://localhost:8000/api/models/${selectedModelId}/?user_id=${user.user_id}`);
+      const model = modelResponse.data;
+
       if (!model) {
         throw new Error("Model not found");
+      }
+
+      if (!model.weights?.weights_url) {
+        throw new Error("No model weights URL found");
       }
 
       // Get the file ID from Google Drive URL
@@ -236,13 +262,13 @@ export default function ManageModels() {
       )}&user_id=${user.user_id}`;
 
       // Download the model file
-      const response = await fetch(proxyUrl);
-      if (!response.ok) {
+      const downloadResponse = await fetch(proxyUrl);
+      if (!downloadResponse.ok) {
         throw new Error("Failed to download model file");
       }
 
       // Get the blob from the response
-      const blob = await response.blob();
+      const blob = await downloadResponse.blob();
 
       // Create FormData to send the file
       const formData = new FormData();
@@ -411,6 +437,7 @@ export default function ManageModels() {
                     }))
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  disabled={isCreating}
                 />
               </div>
               <div>
@@ -427,6 +454,7 @@ export default function ManageModels() {
                   }
                   rows={3}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  disabled={isCreating}
                 />
               </div>
               <div>
@@ -436,28 +464,52 @@ export default function ManageModels() {
                 <input
                   type="file"
                   accept=".h5"
-                  onChange={(e) => handleFileUpload(e, false)}
+                  onChange={handleFileSelect}
                   className="mt-1 block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
                     file:text-sm file:font-semibold
                     file:bg-indigo-50 file:text-indigo-700
                     hover:file:bg-indigo-100"
+                  disabled={isCreating}
                 />
+                {selectedFile && !isCreating && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Selected file: {selectedFile.name}
+                  </p>
+                )}
+                {isCreating && (
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {uploadProgress < 100 ? "Uploading model file..." : "Creating model..."}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="mt-5 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setSelectedFile(null);
+                  }}
                   className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                  disabled={isCreating}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:bg-indigo-400"
+                  disabled={isCreating || !selectedFile}
                 >
-                  Create
+                  {isCreating ? "Creating..." : "Create"}
                 </button>
               </div>
             </form>
@@ -614,7 +666,7 @@ export default function ManageModels() {
                 <input
                   type="file"
                   accept=".h5"
-                  onChange={(e) => handleFileUpload(e, true)}
+                  onChange={(e) => handleFileSelect(e)}
                   className="mt-1 block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
