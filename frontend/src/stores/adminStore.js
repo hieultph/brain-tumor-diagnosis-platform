@@ -178,16 +178,21 @@ export const useAdminStore = create((set, get) => ({
   moderateComment: async (commentId, isApproved) => {
     const user = useAuthStore.getState().user;
     try {
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:8000/api/comments/${commentId}/moderate/`,
         {
           admin_id: user.user_id,
           is_approved: isApproved,
         }
       );
-      return true;
+      if (response.status === 200) {
+        return true;
+      }
+      console.error("Unexpected response status:", response.status);
+      return false;
     } catch (error) {
-      set({ error: "Failed to moderate comment" });
+      console.error("Moderation error:", error.response?.data || error.message);
+      set({ error: error.response?.data?.message || "Failed to moderate comment" });
       return false;
     }
   },

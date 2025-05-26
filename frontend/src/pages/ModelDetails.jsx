@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useModelStore } from "../stores/modelStore";
 import { useAuthStore } from "../stores/authStore";
+import { useAdminStore } from "../stores/adminStore";
 import { StarIcon } from "@heroicons/react/20/solid";
 import {
   ArrowDownTrayIcon,
@@ -19,9 +20,9 @@ export default function ModelDetails() {
     fetchModelComments,
     rateModel,
     commentOnModel,
-    moderateComment,
     fetchModelWeights,
   } = useModelStore();
+  const { moderateComment } = useAdminStore();
   const user = useAuthStore((state) => state.user);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -114,14 +115,19 @@ export default function ModelDetails() {
   };
 
   const handleModerateComment = async (commentId, isApproved) => {
-    const success = await moderateComment(commentId, isApproved);
-    if (success) {
-      toast.success(
-        `Comment ${isApproved ? "approved" : "rejected"} successfully`
-      );
-      // Refresh comments after moderation
-      await fetchModelComments(id);
-    } else {
+    try {
+      const success = await moderateComment(commentId, isApproved);
+      if (success) {
+        toast.success(
+          `Comment ${isApproved ? "approved" : "rejected"} successfully`
+        );
+        // Refresh comments after moderation
+        await fetchModelComments(id);
+      } else {
+        toast.error("Failed to moderate comment");
+      }
+    } catch (error) {
+      console.error("Moderation error:", error);
       toast.error("Failed to moderate comment");
     }
   };

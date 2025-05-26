@@ -189,21 +189,30 @@ export default function ManageModels() {
   };
 
   const handlePublish = async (modelId) => {
-    const model = models.find((m) => m.model_id === modelId);
-    if (!model?.weights?.weights_url) {
-      toast.error("No model weights found");
-      return;
-    }
+    try {
+      // Fetch model details to get weights
+      const response = await axios.get(`http://localhost:8000/api/models/${modelId}/?user_id=${user.user_id}`);
+      const model = response.data;
+      
+      console.log("Model data:", model);
+      if (!model?.weights?.weights_url) {
+        toast.error("No model weights found");
+        return;
+      }
 
-    if (!user?.gdrive?.client_id || !user?.gdrive?.models_url) {
-      toast.error(
-        "Please configure Google Drive settings in your profile first"
-      );
-      return;
-    }
+      if (!user?.gdrive?.client_id || !user?.gdrive?.models_url) {
+        toast.error(
+          "Please configure Google Drive settings in your profile first"
+        );
+        return;
+      }
 
-    setSelectedModelId(modelId);
-    setIsPublishModalOpen(true);
+      setSelectedModelId(modelId);
+      setIsPublishModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching model details:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch model details");
+    }
   };
 
   const confirmPublish = async () => {
@@ -252,7 +261,7 @@ export default function ManageModels() {
         }
       );
 
-      if (publishResponse.data.success) {
+      if (publishResponse.status === 200) {
         toast.success("Model published successfully");
         setIsPublishModalOpen(false);
         setSelectedModelId(null);
