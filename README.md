@@ -4,6 +4,8 @@
 
 This project is a web-based platform designed to enhance brain tumor diagnosis through federated learning. It allows researchers and medical institutions to collaboratively improve AI models while maintaining data privacy. The platform includes role-based access control, secure model management, and real-time predictive analysis.
 
+![Drawing 2025-05-27 21 54 55 excalidraw](https://github.com/user-attachments/assets/6abd781c-0cfc-4e2f-82e8-7f9b5b0eedf5)
+
 ### Technologies Used:
 - **ReactJS** – Frontend framework for an interactive user experience.
 - **Django** – Backend framework handling authentication, data processing, and API interactions.
